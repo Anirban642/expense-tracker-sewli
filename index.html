@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Bloom Wallet – Personal Budget & Expense Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :root {
+    --bg-gradient: linear-gradient(165deg, #FFF5F7 0%, #FEDBE5 50%, #F5E6FE 100%);
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(255, 255, 255, 0.95);
+    --primary: #FF5C8A;
+    --primary-hover: #E04873;
+    --primary-light: #FFE5EE;
+    --accent-gold: #D4A373;
+    --text-main: #4A3E4E;
+    --text-muted: #8E7C93;
+    --income-color: #10B981;
+    --expense-color: #FF4D6D;
+    --shadow-soft: 0 10px 30px -5px rgba(255, 92, 138, 0.15);
+    --shadow-card: 0 12px 32px rgba(186, 119, 146, 0.12);
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -8%;
+    right: -8%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(255, 182, 193, 0.5) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -8%;
+    left: -8%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(225, 190, 231, 0.5) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* iPhone 15 Frame Viewport */
+  .app-viewport {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    padding: 16px 18px 30px 18px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-top: 8px;
+    flex-shrink: 0;
+  }
+
+  .header-brand h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #3B2D3F;
+    letter-spacing: -0.3px;
+  }
+
+  .header-brand p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: -2px;
+  }
+
+  .nav-actions { display: flex; gap: 8px; }
+
+  .icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .icon-btn:active { transform: scale(0.92); }
+
+  .wallet-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 229, 238, 0.9) 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    flex-shrink: 0;
+  }
+
+  .wallet-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  .balance-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 4px 0 14px 0;
+  }
+
+  .wallet-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 92, 138, 0.2);
+  }
+
+  .stat-box { display: flex; flex-direction: column; }
+  .stat-lbl { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
+  .stat-val { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+  .stat-val.income { color: var(--income-color); }
+  .stat-val.expense { color: var(--expense-color); }
+
+  .budget-bar-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(233, 213, 225, 0.5);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .budget-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #10B981 0%, #FF5C8A 100%);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+
+  .btn-action {
+    border: none;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease;
+  }
+
+  .btn-action:active { transform: scale(0.95); }
+
+  .btn-add-money {
+    background: #E6F4EA;
+    color: #137333;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-add-spend {
+    background: linear-gradient(135deg, #FF5C8A 0%, #FF7EB3 100%);
+    color: #FFFFFF;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-left: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Fixed 400px Scrollable History Container */
+  .history-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+  }
+
+  .history-list-container::-webkit-scrollbar { width: 4px; }
+  .history-list-container::-webkit-scrollbar-track { background: transparent; }
+  .history-list-container::-webkit-scrollbar-thumb { background: #FFC2D4; border-radius: 10px; }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+
+  .tx-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .tx-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tx-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .tx-details { display: flex; flex-direction: column; min-width: 0; }
+  .tx-title { font-size: 0.9rem; font-weight: 700; color: var(--text-main); word-break: break-word; }
+  .tx-date { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+  .tx-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .tx-amount { font-size: 0.92rem; font-weight: 800; }
+  .tx-amount.income { color: var(--income-color); }
+  .tx-amount.expense { color: var(--expense-color); }
+
+  .action-btn-icon {
+    background: none;
+    border: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    color: var(--text-muted);
+  }
+
+  .action-btn-icon.edit:active { color: var(--primary); }
+  .action-btn-icon.delete:active { color: var(--expense-color); }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 16px;
+    background: var(--card-bg);
+    border: 1px dashed #FFD6E5;
+    border-radius: 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state-icon { font-size: 2rem; margin-bottom: 6px; }
+  .empty-state-text { font-size: 0.85rem; font-weight: 500; }
+
+  /* Bottom Sheet Modals */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(74, 62, 78, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+
+  .modal-sheet {
+    width: 100%;
+    max-width: 430px;
+    background: #FFF9FA;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    padding: 20px 18px 34px 18px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.active .modal-sheet { transform: translateY(0); }
+
+  .modal-handle {
+    width: 40px;
+    height: 5px;
+    background: #E8D8E0;
+    border-radius: 99px;
+    margin: 0 auto 14px auto;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: #3B2D3F;
+  }
+
+  .close-btn {
+    background: #F3E8EE;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-group { margin-bottom: 12px; }
+  .form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .form-input, .form-select {
+    width: 100%;
+    background: #FFF;
+    border: 1px solid #FFD6E5;
+    border-radius: 14px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    outline: none;
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #FF5C8A 0%, #FF7EB3 100%);
+    color: #FFF;
+    border: none;
+    padding: 14px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 6px;
+    box-shadow: 0 4px 14px rgba(255, 92, 138, 0.3);
+  }
+
+  .calendar-summary-card {
+    background: #FFF;
+    border: 1px solid #FFD6E5;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .settings-btn {
+    width: 100%;
+    background: #FFF;
+    border: 1px solid #FFD6E5;
+    color: var(--text-main);
+    padding: 12px;
+    border-radius: 14px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-viewport">
+
+  <header>
+    <div class="header-brand">
+      <h1>Bloom Wallet 🌸</h1>
+      <p id="headerDate">Loading...</p>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" onclick="openModal('calendarModal')" title="Calendar Inspector">📅</button>
+      <button class="icon-btn" onclick="openModal('settingsModal')" title="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <div class="wallet-card">
+    <span class="wallet-label">Personal Spending Bank</span>
+    <div class="balance-amount" id="balanceDisplay">₹0</div>
+
+    <div class="wallet-stats-grid">
+      <div class="stat-box">
+        <span class="stat-lbl">Added (Income)</span>
+        <span class="stat-val income" id="incomeDisplay">+₹0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-lbl">Spent (Expenses)</span>
+        <span class="stat-val expense" id="expenseDisplay">-₹0</span>
+      </div>
+    </div>
+
+    <div class="budget-bar-track">
+      <div class="budget-bar-fill" id="budgetBarFill"></div>
+    </div>
+  </div>
+
+  <div class="action-grid">
+    <button class="btn-action btn-add-money" onclick="openTransactionModal('income')">💵 Add Money</button>
+    <button class="btn-action btn-add-spend" onclick="openTransactionModal('expense')">🛍️ Record Spend</button>
+  </div>
+
+  <div class="section-label">
+    <span id="historyTitleLabel">Recent Transactions</span>
+    <span style="font-size:0.7rem; color:var(--primary); cursor:pointer; display:none;" id="clearFilterBtn" onclick="resetFilter()">Clear Filter ✕</span>
+  </div>
+
+  <div class="history-list-container">
+    <div class="history-list" id="transactionList">
+      <!-- Dynamic Transactions Render Here -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Unified Create/Edit Transaction Modal -->
+<div class="modal-overlay" id="transactionModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title" id="txModalTitle">Record Spend 🛍️</h3>
+      <button class="close-btn" onclick="closeModal('transactionModal')">✕</button>
+    </div>
+    <form id="transactionForm">
+      <input type="hidden" id="txEditingId" value="">
+      <input type="hidden" id="txTypeInput" value="expense">
+
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <input type="number" class="form-input" id="txAmountInput" placeholder="e.g. 250" min="1" required>
+      </div>
+      
+      <div class="form-group" id="txCategoryGroup">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="txCategoryInput">
+          <option value="Shopping 🛍️">Shopping 🛍️</option>
+          <option value="Food & Drinks 🍰">Food & Drinks 🍰</option>
+          <option value="Travel 🚕">Travel 🚕</option>
+          <option value="Self Care 💄">Self Care 💄</option>
+          <option value="Bills & Recharge 💳">Bills & Recharge 💳</option>
+          <option value="Other ✨">Other ✨</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date (Past or Present)</label>
+        <input type="date" class="form-input" id="txDateInput" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description / Note</label>
+        <input type="text" class="form-input" id="txDescInput" placeholder="e.g. Coffee, dress, allowance..." required>
+      </div>
+
+      <button type="submit" class="btn-submit" id="txSubmitBtn">Save Transaction ✨</button>
+    </form>
+  </div>
+</div>
+
+<!-- Calendar Day Inspector Modal -->
+<div class="modal-overlay" id="calendarModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title">Calendar & History 🗓️</h3>
+      <button class="close-btn" onclick="closeModal('calendarModal')">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Select Date To Inspect</label>
+      <input type="date" class="form-input" id="calendarDatePicker" onchange="renderCalendarDayData(this.value)">
+    </div>
+
+    <div class="calendar-summary-card">
+      <div>
+        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">Selected Date Total</div>
+        <div style="font-size:1.1rem; font-weight:800; color:var(--expense-color);" id="calDateExpenseSum">-₹0</div>
+      </div>
+      <button class="btn-action btn-add-spend" style="padding:8px 12px; font-size:0.75rem;" onclick="addSpendForSelectedCalendarDate()">+ Add For This Date</button>
+    </div>
+
+    <div class="history-list" id="calendarDayList">
+      <!-- Dynamic Selected Date Transactions -->
+    </div>
+  </div>
+</div>
+
+<!-- Settings & Backup Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title">Settings & Backup 💖</h3>
+      <button class="close-btn" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px; line-height:1.4;">
+      Lifelong browser storage keeps records safe. Export a JSON file to transfer your budget history anywhere.
+    </p>
+    <button class="settings-btn" onclick="exportData()">📥 Export Wallet Backup (JSON)</button>
+    <button class="settings-btn" onclick="document.getElementById('importFileInput').click()">📤 Import Wallet Backup (JSON)</button>
+    <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
+  </div>
+</div>
+
+<script>
+  let state = {
+    transactions: [], // [{ id, type: 'income'|'expense', amount, category, date, desc }]
+    activeFilterDate: null
+  };
+
+  function getTodayString() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function loadState() {
+    const saved = localStorage.getItem('bloom_wallet_girly_tracker_v2') || localStorage.getItem('bloom_wallet_girly_tracker_v1');
+    if (saved) {
+      try {
+        state.transactions = JSON.parse(saved) || [];
+      } catch(e) { console.error("Error reading localStorage", e); }
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem('bloom_wallet_girly_tracker_v2', JSON.stringify(state.transactions));
+    localStorage.setItem('bloom_wallet_girly_tracker_v1', JSON.stringify(state.transactions));
+  }
+
+  function sortTransactionsChronologically() {
+    // Reverse chronological order: newest dates at the top
+    state.transactions.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+  }
+
+  function renderWallet() {
+    sortTransactionsChronologically();
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    state.transactions.forEach(tx => {
+      if (tx.type === 'income') totalIncome += tx.amount;
+      else if (tx.type === 'expense') totalExpense += tx.amount;
+    });
+
+    const netBalance = totalIncome - totalExpense;
+
+    document.getElementById('balanceDisplay').innerText = `₹${netBalance.toLocaleString('en-IN')}`;
+    document.getElementById('incomeDisplay').innerText = `+₹${totalIncome.toLocaleString('en-IN')}`;
+    document.getElementById('expenseDisplay').innerText = `-₹${totalExpense.toLocaleString('en-IN')}`;
+
+    const usagePercent = totalIncome === 0 ? 0 : Math.min(100, Math.round((totalExpense / totalIncome) * 100));
+    document.getElementById('budgetBarFill').style.width = `${usagePercent}%`;
+
+    renderTransactions();
+  }
+
+  function renderTransactions() {
+    const list = document.getElementById('transactionList');
+    list.innerHTML = '';
+
+    let filtered = state.transactions;
+
+    if (state.activeFilterDate) {
+      filtered = filtered.filter(tx => tx.date === state.activeFilterDate);
+      document.getElementById('historyTitleLabel').innerText = `Spends on ${state.activeFilterDate}`;
+      document.getElementById('clearFilterBtn').style.display = 'inline';
+    } else {
+      document.getElementById('historyTitleLabel').innerText = `Recent Transactions`;
+      document.getElementById('clearFilterBtn').style.display = 'none';
+    }
+
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">👛</div>
+          <div class="empty-state-text">No spending records found!<br>Add funds or record a spend above.</div>
+        </div>
+      `;
+      return;
+    }
+
+    filtered.forEach(tx => {
+      const item = document.createElement('div');
+      item.className = 'tx-item';
+      const icon = tx.type === 'income' ? '💵' : (tx.category ? tx.category.split(' ')[1] || '🛍️' : '🛍️');
+
+      item.innerHTML = `
+        <div class="tx-left">
+          <div class="tx-icon">${icon}</div>
+          <div class="tx-details">
+            <span class="tx-title">${escapeHtml(tx.desc)}</span>
+            <span class="tx-date">${tx.date} • ${tx.type === 'income' ? 'Deposit' : tx.category}</span>
+          </div>
+        </div>
+        <div class="tx-right">
+          <span class="tx-amount ${tx.type}">${tx.type === 'income' ? '+' : '-'}₹${tx.amount.toLocaleString('en-IN')}</span>
+          <button class="action-btn-icon edit" onclick="editTransaction(${tx.id})" title="Edit">✏️</button>
+          <button class="action-btn-icon delete" onclick="deleteTransaction(${tx.id})" title="Delete">✕</button>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  function openTransactionModal(type, editId = null) {
+    const form = document.getElementById('transactionForm');
+    form.reset();
+
+    document.getElementById('txEditingId').value = editId || '';
+    document.getElementById('txTypeInput').value = type;
+
+    const modalTitle = document.getElementById('txModalTitle');
+    const categoryGroup = document.getElementById('txCategoryGroup');
+    const dateInput = document.getElementById('txDateInput');
+
+    dateInput.value = getTodayString();
+
+    if (type === 'income') {
+      modalTitle.innerText = editId ? "Edit Added Funds 💵" : "Add Money to Bank 💵";
+      categoryGroup.style.display = 'none';
+    } else {
+      modalTitle.innerText = editId ? "Edit Spend Record 🛍️" : "Record New Spend 🛍️";
+      categoryGroup.style.display = 'block';
+    }
+
+    if (editId) {
+      const tx = state.transactions.find(t => t.id === editId);
+      if (tx) {
+        document.getElementById('txAmountInput').value = tx.amount;
+        document.getElementById('txDateInput').value = tx.date;
+        document.getElementById('txDescInput').value = tx.desc;
+        if (tx.type === 'expense') {
+          document.getElementById('txCategoryInput').value = tx.category;
+        }
+      }
+    }
+
+    openModal('transactionModal');
+  }
+
+  function editTransaction(id) {
+    const tx = state.transactions.find(t => t.id === id);
+    if (tx) {
+      openTransactionModal(tx.type, tx.id);
+    }
+  }
+
+  function deleteTransaction(id) {
+    if (confirm("Delete this spending entry?")) {
+      state.transactions = state.transactions.filter(tx => tx.id !== id);
+      saveState();
+      renderWallet();
+      if (document.getElementById('calendarModal').classList.contains('active')) {
+        renderCalendarDayData(document.getElementById('calendarDatePicker').value);
+      }
+    }
+  }
+
+  function renderCalendarDayData(dateStr) {
+    const container = document.getElementById('calendarDayList');
+    container.innerHTML = '';
+
+    if (!dateStr) return;
+
+    const daySpends = state.transactions.filter(tx => tx.date === dateStr);
+    let totalDayExpense = 0;
+
+    daySpends.forEach(tx => {
+      if (tx.type === 'expense') totalDayExpense += tx.amount;
+    });
+
+    document.getElementById('calDateExpenseSum').innerText = `-₹${totalDayExpense.toLocaleString('en-IN')}`;
+
+    if (daySpends.length === 0) {
+      container.innerHTML = `<p style="font-size:0.82rem; color:var(--text-muted); text-align:center; padding:16px;">No records for ${dateStr}. 🌸</p>`;
+      return;
+    }
+
+    daySpends.forEach(tx => {
+      const item = document.createElement('div');
+      item.className = 'tx-item';
+      const icon = tx.type === 'income' ? '💵' : (tx.category ? tx.category.split(' ')[1] || '🛍️' : '🛍️');
+
+      item.innerHTML = `
+        <div class="tx-left">
+          <div class="tx-icon">${icon}</div>
+          <div class="tx-details">
+            <span class="tx-title">${escapeHtml(tx.desc)}</span>
+            <span class="tx-date">${tx.type === 'income' ? 'Deposit' : tx.category}</span>
+          </div>
+        </div>
+        <div class="tx-right">
+          <span class="tx-amount ${tx.type}">${tx.type === 'income' ? '+' : '-'}₹${tx.amount.toLocaleString('en-IN')}</span>
+          <button class="action-btn-icon edit" onclick="editTransaction(${tx.id})" title="Edit">✏️</button>
+          <button class="action-btn-icon delete" onclick="deleteTransaction(${tx.id})" title="Delete">✕</button>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  }
+
+  function addSpendForSelectedCalendarDate() {
+    const selectedDate = document.getElementById('calendarDatePicker').value;
+    closeModal('calendarModal');
+    openTransactionModal('expense');
+    document.getElementById('txDateInput').value = selectedDate || getTodayString();
+  }
+
+  function applyDateFilter() {
+    const dateVal = document.getElementById('calendarDatePicker').value;
+    if (dateVal) {
+      state.activeFilterDate = dateVal;
+      renderTransactions();
+      closeModal('calendarModal');
+    }
+  }
+
+  function resetFilter() {
+    state.activeFilterDate = null;
+    renderTransactions();
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    if (id === 'calendarModal') {
+      const today = getTodayString();
+      document.getElementById('calendarDatePicker').value = today;
+      renderCalendarDayData(today);
+    }
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.transactions, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `Bloom_Wallet_Backup_${getTodayString()}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (Array.isArray(imported)) {
+          state.transactions = imported;
+          saveState();
+          renderWallet();
+          alert("Wallet history restored successfully! ✨");
+          closeModal('settingsModal');
+        } else {
+          alert("Invalid backup file format.");
+        }
+      } catch (err) {
+        alert("Error importing JSON backup file.");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  document.getElementById('transactionForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const editId = document.getElementById('txEditingId').value;
+    const type = document.getElementById('txTypeInput').value;
+    const amount = parseFloat(document.getElementById('txAmountInput').value);
+    const date = document.getElementById('txDateInput').value;
+    const desc = document.getElementById('txDescInput').value.trim();
+    const category = type === 'expense' ? document.getElementById('txCategoryInput').value : 'Deposit 💵';
+
+    if (editId) {
+      state.transactions = state.transactions.map(tx => {
+        if (tx.id == editId) {
+          return { ...tx, type, amount, date, desc, category };
+        }
+        return tx;
+      });
+    } else {
+      state.transactions.push({
+        id: Date.now(),
+        type,
+        amount,
+        category,
+        date,
+        desc
+      });
+    }
+
+    saveState();
+    renderWallet();
+    closeModal('transactionModal');
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadState();
+    renderWallet();
+
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-US', options);
+  });
+</script>
+</body>
+</html>
