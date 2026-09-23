@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Bloom Wallet – Personal Budget & Expense Tracker</title>
+<title>Bloom Wallet – Simple Personal Budget</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after {
@@ -14,19 +14,19 @@
   }
 
   :root {
-    --bg-gradient: linear-gradient(165deg, #FFF5F7 0%, #FEDBE5 50%, #F5E6FE 100%);
-    --card-bg: rgba(255, 255, 255, 0.85);
+    --bg-gradient: linear-gradient(165deg, #F5F3FF 0%, #EDE9FE 45%, #F0FDF4 100%);
+    --card-bg: rgba(255, 255, 255, 0.88);
     --card-border: rgba(255, 255, 255, 0.95);
-    --primary: #FF5C8A;
-    --primary-hover: #E04873;
-    --primary-light: #FFE5EE;
-    --accent-gold: #D4A373;
-    --text-main: #4A3E4E;
-    --text-muted: #8E7C93;
-    --income-color: #10B981;
-    --expense-color: #FF4D6D;
-    --shadow-soft: 0 10px 30px -5px rgba(255, 92, 138, 0.15);
-    --shadow-card: 0 12px 32px rgba(186, 119, 146, 0.12);
+    --primary: #7C3AED;
+    --primary-light: #DDD6FE;
+    --accent-emerald: #059669;
+    --accent-emerald-light: #D1FAE5;
+    --text-main: #332A45;
+    --text-muted: #706585;
+    --income-color: #059669;
+    --expense-color: #DC2626;
+    --shadow-soft: 0 10px 30px -5px rgba(124, 58, 237, 0.12);
+    --shadow-card: 0 12px 32px rgba(109, 83, 153, 0.10);
   }
 
   html, body {
@@ -55,7 +55,7 @@
     right: -8%;
     width: 280px;
     height: 280px;
-    background: radial-gradient(circle, rgba(255, 182, 193, 0.5) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(196, 181, 253, 0.4) 0%, rgba(255,255,255,0) 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -67,12 +67,11 @@
     left: -8%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(225, 190, 231, 0.5) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(167, 243, 208, 0.4) 0%, rgba(255,255,255,0) 70%);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* iPhone 15 Frame Viewport */
   .app-viewport {
     width: 100%;
     max-width: 430px;
@@ -97,7 +96,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 1.75rem;
     font-weight: 600;
-    color: #3B2D3F;
+    color: #2E253E;
     letter-spacing: -0.3px;
   }
 
@@ -130,8 +129,9 @@
 
   .icon-btn:active { transform: scale(0.92); }
 
+  /* Main Top Balance Banner Card */
   .wallet-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 229, 238, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(237, 233, 254, 0.85) 100%);
     border: 1px solid var(--card-border);
     border-radius: 24px;
     padding: 20px;
@@ -163,7 +163,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding-top: 12px;
-    border-top: 1px dashed rgba(255, 92, 138, 0.2);
+    border-top: 1px dashed rgba(124, 58, 237, 0.2);
   }
 
   .stat-box { display: flex; flex-direction: column; }
@@ -172,23 +172,103 @@
   .stat-val.income { color: var(--income-color); }
   .stat-val.expense { color: var(--expense-color); }
 
-  .budget-bar-track {
-    width: 100%;
-    height: 8px;
-    background: rgba(233, 213, 225, 0.5);
-    border-radius: 99px;
-    overflow: hidden;
-    margin-top: 10px;
+  /* Occupations Section & Scroll Container */
+  .occupations-section {
+    margin-bottom: 16px;
+    flex-shrink: 0;
   }
 
-  .budget-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #10B981 0%, #FF5C8A 100%);
-    border-radius: 99px;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding-left: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
   }
 
+  .add-occ-btn {
+    font-size: 0.72rem;
+    color: var(--primary);
+    font-weight: 700;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  /* Fixed Scrollable Occupations Grid */
+  .occupations-container {
+    max-height: 180px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+  }
+
+  .occupations-container::-webkit-scrollbar { width: 4px; }
+  .occupations-container::-webkit-scrollbar-track { background: transparent; }
+  .occupations-container::-webkit-scrollbar-thumb { background: #DDD6FE; border-radius: 10px; }
+
+  .occupations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .occ-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .occ-card.fixed-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(124, 58, 237, 0.2);
+  }
+
+  .occ-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .occ-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .occ-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  .occ-subtext {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  .occ-delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  /* Action Buttons Grid */
   .action-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -215,33 +295,19 @@
   .btn-action:active { transform: scale(0.95); }
 
   .btn-add-money {
-    background: #E6F4EA;
-    color: #137333;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: var(--accent-emerald-light);
+    color: var(--accent-emerald);
+    border: 1px solid rgba(5, 150, 105, 0.2);
   }
 
   .btn-add-spend {
-    background: linear-gradient(135deg, #FF5C8A 0%, #FF7EB3 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
     color: #FFFFFF;
   }
 
-  .section-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-    padding-left: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-  }
-
-  /* Fixed 400px Scrollable History Container */
+  /* Scrollable History Container */
   .history-list-container {
-    max-height: 400px;
+    max-height: 380px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding-right: 4px;
@@ -249,7 +315,7 @@
 
   .history-list-container::-webkit-scrollbar { width: 4px; }
   .history-list-container::-webkit-scrollbar-track { background: transparent; }
-  .history-list-container::-webkit-scrollbar-thumb { background: #FFC2D4; border-radius: 10px; }
+  .history-list-container::-webkit-scrollbar-thumb { background: #DDD6FE; border-radius: 10px; }
 
   .history-list {
     display: flex;
@@ -317,7 +383,7 @@
     text-align: center;
     padding: 30px 16px;
     background: var(--card-bg);
-    border: 1px dashed #FFD6E5;
+    border: 1px dashed #DDD6FE;
     border-radius: 20px;
     color: var(--text-muted);
   }
@@ -325,11 +391,11 @@
   .empty-state-icon { font-size: 2rem; margin-bottom: 6px; }
   .empty-state-text { font-size: 0.85rem; font-weight: 500; }
 
-  /* Bottom Sheet Modals */
+  /* Modals */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(74, 62, 78, 0.4);
+    background: rgba(51, 42, 69, 0.4);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     display: flex;
@@ -346,7 +412,7 @@
   .modal-sheet {
     width: 100%;
     max-width: 430px;
-    background: #FFF9FA;
+    background: #FAF9FE;
     border-top-left-radius: 32px;
     border-top-right-radius: 32px;
     padding: 20px 18px 34px 18px;
@@ -362,7 +428,7 @@
   .modal-handle {
     width: 40px;
     height: 5px;
-    background: #E8D8E0;
+    background: #E5E1F0;
     border-radius: 99px;
     margin: 0 auto 14px auto;
   }
@@ -377,11 +443,11 @@
   .modal-title {
     font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
-    color: #3B2D3F;
+    color: #2E253E;
   }
 
   .close-btn {
-    background: #F3E8EE;
+    background: #EDE9FE;
     border: none;
     width: 30px;
     height: 30px;
@@ -407,7 +473,7 @@
   .form-input, .form-select {
     width: 100%;
     background: #FFF;
-    border: 1px solid #FFD6E5;
+    border: 1px solid #DDD6FE;
     border-radius: 14px;
     padding: 12px;
     font-family: inherit;
@@ -418,7 +484,7 @@
 
   .btn-submit {
     width: 100%;
-    background: linear-gradient(135deg, #FF5C8A 0%, #FF7EB3 100%);
+    background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);
     color: #FFF;
     border: none;
     padding: 14px;
@@ -427,12 +493,12 @@
     font-size: 0.9rem;
     cursor: pointer;
     margin-top: 6px;
-    box-shadow: 0 4px 14px rgba(255, 92, 138, 0.3);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
   }
 
   .calendar-summary-card {
     background: #FFF;
-    border: 1px solid #FFD6E5;
+    border: 1px solid #DDD6FE;
     border-radius: 16px;
     padding: 14px;
     margin-bottom: 14px;
@@ -444,7 +510,7 @@
   .settings-btn {
     width: 100%;
     background: #FFF;
-    border: 1px solid #FFD6E5;
+    border: 1px solid #DDD6FE;
     color: var(--text-main);
     padding: 12px;
     border-radius: 14px;
@@ -475,45 +541,84 @@
     </div>
   </header>
 
+  <!-- Main Balance Banner Card -->
   <div class="wallet-card">
-    <span class="wallet-label">Personal Spending Bank</span>
+    <span class="wallet-label">Available Free Cash</span>
     <div class="balance-amount" id="balanceDisplay">₹0</div>
 
     <div class="wallet-stats-grid">
       <div class="stat-box">
-        <span class="stat-lbl">Added (Income)</span>
+        <span class="stat-lbl">Total Salary Added</span>
         <span class="stat-val income" id="incomeDisplay">+₹0</span>
       </div>
       <div class="stat-box">
-        <span class="stat-lbl">Spent (Expenses)</span>
+        <span class="stat-lbl">Total Spent</span>
         <span class="stat-val expense" id="expenseDisplay">-₹0</span>
       </div>
     </div>
+  </div>
 
-    <div class="budget-bar-track">
-      <div class="budget-bar-fill" id="budgetBarFill"></div>
+  <!-- Occupations Section (Fixed Container + Internal Scroll) -->
+  <div class="occupations-section">
+    <div class="section-label">
+      <span>Allocated Occupations</span>
+      <button class="add-occ-btn" onclick="openModal('addOccModal')">+ Add Custom ➕</button>
+    </div>
+    <div class="occupations-container">
+      <div class="occupations-grid" id="occupationsGrid">
+        <!-- Dynamic & Fixed Occupation Cards -->
+      </div>
     </div>
   </div>
 
+  <!-- Action Buttons -->
   <div class="action-grid">
-    <button class="btn-action btn-add-money" onclick="openTransactionModal('income')">💵 Add Money</button>
+    <button class="btn-action btn-add-money" onclick="openIncomeModal()">💵 Add Salary/Income</button>
     <button class="btn-action btn-add-spend" onclick="openTransactionModal('expense')">🛍️ Record Spend</button>
   </div>
 
+  <!-- Transactions Title -->
   <div class="section-label">
-    <span id="historyTitleLabel">Recent Transactions</span>
+    <span id="historyTitleLabel">Recent Spends & Income</span>
     <span style="font-size:0.7rem; color:var(--primary); cursor:pointer; display:none;" id="clearFilterBtn" onclick="resetFilter()">Clear Filter ✕</span>
   </div>
 
+  <!-- Scrollable History Container -->
   <div class="history-list-container">
     <div class="history-list" id="transactionList">
-      <!-- Dynamic Transactions Render Here -->
+      <!-- Dynamic Transactions -->
     </div>
   </div>
 
 </div>
 
-<!-- Unified Create/Edit Transaction Modal -->
+<!-- Deposit Salary/Income Modal -->
+<div class="modal-overlay" id="incomeModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title">Add Salary or Income 💵</h3>
+      <button class="close-btn" onclick="closeModal('incomeModal')">✕</button>
+    </div>
+    <form id="incomeForm">
+      <div class="form-group">
+        <label class="form-label">Salary / Income Amount (₹)</label>
+        <input type="number" class="form-input" id="incAmountInput" placeholder="e.g. 8000" min="1" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date Received</label>
+        <input type="date" class="form-input" id="incDateInput" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-input" id="incDescInput" placeholder="e.g. September Salary" required>
+      </div>
+      <button type="submit" class="btn-submit">Add Salary ✨</button>
+    </form>
+  </div>
+</div>
+
+<!-- Record Expense Modal -->
 <div class="modal-overlay" id="transactionModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -523,19 +628,20 @@
     </div>
     <form id="transactionForm">
       <input type="hidden" id="txEditingId" value="">
-      <input type="hidden" id="txTypeInput" value="expense">
 
       <div class="form-group">
         <label class="form-label">Amount (₹)</label>
-        <input type="number" class="form-input" id="txAmountInput" placeholder="e.g. 250" min="1" required>
+        <input type="number" class="form-input" id="txAmountInput" placeholder="e.g. 100" min="1" required>
       </div>
-      
-      <div class="form-group" id="txCategoryGroup">
+
+      <div class="form-group">
         <label class="form-label">Category</label>
         <select class="form-select" id="txCategoryInput">
-          <option value="Shopping 🛍️">Shopping 🛍️</option>
           <option value="Food & Drinks 🍰">Food & Drinks 🍰</option>
-          <option value="Travel 🚕">Travel 🚕</option>
+          <option value="Shopping 🛍️">Shopping 🛍️</option>
+          <option value="Cake Ingredients 🎂">Cake Ingredients 🎂</option>
+          <option value="Travel & Fuel 🛵">Travel & Fuel 🛵</option>
+          <option value="Family 🌸">Family 🌸</option>
           <option value="Self Care 💄">Self Care 💄</option>
           <option value="Bills & Recharge 💳">Bills & Recharge 💳</option>
           <option value="Other ✨">Other ✨</option>
@@ -543,21 +649,62 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Date (Past or Present)</label>
+        <label class="form-label">Date</label>
         <input type="date" class="form-input" id="txDateInput" required>
       </div>
 
       <div class="form-group">
         <label class="form-label">Description / Note</label>
-        <input type="text" class="form-input" id="txDescInput" placeholder="e.g. Coffee, dress, allowance..." required>
+        <input type="text" class="form-input" id="txDescInput" placeholder="e.g. Cocoa powder, butter, coffee..." required>
       </div>
 
-      <button type="submit" class="btn-submit" id="txSubmitBtn">Save Transaction ✨</button>
+      <button type="submit" class="btn-submit" id="txSubmitBtn">Deduct & Save Expense 💸</button>
     </form>
   </div>
 </div>
 
-<!-- Calendar Day Inspector Modal -->
+<!-- Add Custom Occupation Modal -->
+<div class="modal-overlay" id="addOccModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title">Add Custom Occupation ➕</h3>
+      <button class="close-btn" onclick="closeModal('addOccModal')">✕</button>
+    </div>
+    <form id="addOccForm">
+      <div class="form-group">
+        <label class="form-label">Occupation Name & Emoji</label>
+        <input type="text" class="form-input" id="occNameInput" placeholder="e.g. iPhone 📱, Cycle 🚲, Gym 🏋️" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Allocated Amount (₹)</label>
+        <input type="number" class="form-input" id="occAmountInput" placeholder="e.g. 1000" min="0" required>
+      </div>
+      <button type="submit" class="btn-submit">Save Occupation ✨</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Occupation Amount Modal -->
+<div class="modal-overlay" id="editOccModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 class="modal-title" id="editOccModalTitle">Edit Allocation ✏️</h3>
+      <button class="close-btn" onclick="closeModal('editOccModal')">✕</button>
+    </div>
+    <form id="editOccForm">
+      <input type="hidden" id="editOccIdInput" value="">
+      <div class="form-group">
+        <label class="form-label">Allocated Amount (₹)</label>
+        <input type="number" class="form-input" id="editOccAmountInput" placeholder="e.g. 1000" min="0" required>
+      </div>
+      <button type="submit" class="btn-submit">Update Allocation ✨</button>
+    </form>
+  </div>
+</div>
+
+<!-- Calendar Inspector Modal -->
 <div class="modal-overlay" id="calendarModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -580,7 +727,7 @@
     </div>
 
     <div class="history-list" id="calendarDayList">
-      <!-- Dynamic Selected Date Transactions -->
+      <!-- Dynamic Date Transactions -->
     </div>
   </div>
 </div>
@@ -604,7 +751,15 @@
 
 <script>
   let state = {
-    transactions: [], // [{ id, type: 'income'|'expense', amount, category, date, desc }]
+    transactions: [],
+    // 4 Hardcoded Fixed Occupations (Mummy, Scooter, Personal, Cake Ingredients)
+    fixedOccupations: {
+      mummy: { name: 'Mummy 🌸', amount: 1000 },
+      scooter: { name: 'Scooter 🛵', amount: 1000 },
+      personal: { name: 'Personal 👛', amount: 1000 },
+      cake: { name: 'Cake Ingredients 🎂', amount: 1000 }
+    },
+    customOccupations: [],
     activeFilterDate: null
   };
 
@@ -617,21 +772,33 @@
   }
 
   function loadState() {
-    const saved = localStorage.getItem('bloom_wallet_girly_tracker_v2') || localStorage.getItem('bloom_wallet_girly_tracker_v1');
+    const saved = localStorage.getItem('bloom_wallet_girly_tracker_v7') || localStorage.getItem('bloom_wallet_girly_tracker_v6');
     if (saved) {
       try {
-        state.transactions = JSON.parse(saved) || [];
+        const parsed = JSON.parse(saved);
+        state.transactions = parsed.transactions || [];
+        if (parsed.fixedOccupations) {
+          state.fixedOccupations = {
+            mummy: parsed.fixedOccupations.mummy || { name: 'Mummy 🌸', amount: 1000 },
+            scooter: parsed.fixedOccupations.scooter || { name: 'Scooter 🛵', amount: 1000 },
+            personal: parsed.fixedOccupations.personal || { name: 'Personal 👛', amount: 1000 },
+            cake: parsed.fixedOccupations.cake || { name: 'Cake Ingredients 🎂', amount: 1000 }
+          };
+        }
+        if (parsed.customOccupations) state.customOccupations = parsed.customOccupations;
       } catch(e) { console.error("Error reading localStorage", e); }
     }
   }
 
   function saveState() {
-    localStorage.setItem('bloom_wallet_girly_tracker_v2', JSON.stringify(state.transactions));
-    localStorage.setItem('bloom_wallet_girly_tracker_v1', JSON.stringify(state.transactions));
+    localStorage.setItem('bloom_wallet_girly_tracker_v7', JSON.stringify({
+      transactions: state.transactions,
+      fixedOccupations: state.fixedOccupations,
+      customOccupations: state.customOccupations
+    }));
   }
 
   function sortTransactionsChronologically() {
-    // Reverse chronological order: newest dates at the top
     state.transactions.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
   }
 
@@ -646,16 +813,96 @@
       else if (tx.type === 'expense') totalExpense += tx.amount;
     });
 
-    const netBalance = totalIncome - totalExpense;
+    // Total Allocations (4 Fixed Cards + Custom)
+    let totalAllocations = (parseFloat(state.fixedOccupations.mummy.amount) || 0) +
+                           (parseFloat(state.fixedOccupations.scooter.amount) || 0) +
+                           (parseFloat(state.fixedOccupations.personal.amount) || 0) +
+                           (parseFloat(state.fixedOccupations.cake.amount) || 0);
 
-    document.getElementById('balanceDisplay').innerText = `₹${netBalance.toLocaleString('en-IN')}`;
+    state.customOccupations.forEach(occ => {
+      totalAllocations += parseFloat(occ.amount) || 0;
+    });
+
+    // Available Free Cash = Total Income - Total Allocations - Total Expenses
+    const availableFreeCash = Math.max(0, totalIncome - totalAllocations - totalExpense);
+
+    document.getElementById('balanceDisplay').innerText = `₹${availableFreeCash.toLocaleString('en-IN')}`;
     document.getElementById('incomeDisplay').innerText = `+₹${totalIncome.toLocaleString('en-IN')}`;
     document.getElementById('expenseDisplay').innerText = `-₹${totalExpense.toLocaleString('en-IN')}`;
 
-    const usagePercent = totalIncome === 0 ? 0 : Math.min(100, Math.round((totalExpense / totalIncome) * 100));
-    document.getElementById('budgetBarFill').style.width = `${usagePercent}%`;
-
+    renderOccupations();
     renderTransactions();
+  }
+
+  function renderOccupations() {
+    const grid = document.getElementById('occupationsGrid');
+    grid.innerHTML = '';
+
+    // Render 4 Fixed Cards
+    const fixedKeys = [
+      { key: 'mummy', data: state.fixedOccupations.mummy },
+      { key: 'scooter', data: state.fixedOccupations.scooter },
+      { key: 'personal', data: state.fixedOccupations.personal },
+      { key: 'cake', data: state.fixedOccupations.cake }
+    ];
+
+    fixedKeys.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'occ-card fixed-card';
+      card.innerHTML = `
+        <div class="occ-title-row">
+          <span class="occ-name">${escapeHtml(item.data.name)}</span>
+          <button class="occ-delete-btn" onclick="openEditOccModal('${item.key}', true)" title="Edit Amount">✏️</button>
+        </div>
+        <div class="occ-value">₹${parseFloat(item.data.amount).toLocaleString('en-IN')}</div>
+        <span class="occ-subtext">Fixed Occupation</span>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Render Custom Occupations
+    state.customOccupations.forEach(occ => {
+      const card = document.createElement('div');
+      card.className = 'occ-card';
+      card.innerHTML = `
+        <div class="occ-title-row">
+          <span class="occ-name">${escapeHtml(occ.name)}</span>
+          <div>
+            <button class="occ-delete-btn" onclick="openEditOccModal('${occ.id}', false)" title="Edit">✏️</button>
+            <button class="occ-delete-btn" onclick="deleteCustomOccupation('${occ.id}')" title="Delete">✕</button>
+          </div>
+        </div>
+        <div class="occ-value">₹${parseFloat(occ.amount).toLocaleString('en-IN')}</div>
+        <span class="occ-subtext">Custom Occupation</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function openEditOccModal(idKey, isFixed) {
+    document.getElementById('editOccIdInput').value = idKey;
+    const title = document.getElementById('editOccModalTitle');
+    const input = document.getElementById('editOccAmountInput');
+
+    if (isFixed) {
+      title.innerText = `Edit ${state.fixedOccupations[idKey].name} Amount ✏️`;
+      input.value = state.fixedOccupations[idKey].amount;
+    } else {
+      const custom = state.customOccupations.find(c => c.id === idKey);
+      if (custom) {
+        title.innerText = `Edit ${custom.name} Amount ✏️`;
+        input.value = custom.amount;
+      }
+    }
+    openModal('editOccModal');
+  }
+
+  function deleteCustomOccupation(id) {
+    if (confirm("Remove this custom occupation?")) {
+      state.customOccupations = state.customOccupations.filter(o => o.id !== id);
+      saveState();
+      renderWallet();
+    }
   }
 
   function renderTransactions() {
@@ -669,7 +916,7 @@
       document.getElementById('historyTitleLabel').innerText = `Spends on ${state.activeFilterDate}`;
       document.getElementById('clearFilterBtn').style.display = 'inline';
     } else {
-      document.getElementById('historyTitleLabel').innerText = `Recent Transactions`;
+      document.getElementById('historyTitleLabel').innerText = `Recent Spends & Income`;
       document.getElementById('clearFilterBtn').style.display = 'none';
     }
 
@@ -677,7 +924,7 @@
       list.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">👛</div>
-          <div class="empty-state-text">No spending records found!<br>Add funds or record a spend above.</div>
+          <div class="empty-state-text">No spending records found!<br>Add salary or record a spend above.</div>
         </div>
       `;
       return;
@@ -693,7 +940,7 @@
           <div class="tx-icon">${icon}</div>
           <div class="tx-details">
             <span class="tx-title">${escapeHtml(tx.desc)}</span>
-            <span class="tx-date">${tx.date} • ${tx.type === 'income' ? 'Deposit' : tx.category}</span>
+            <span class="tx-date">${tx.date} • ${tx.type === 'income' ? 'Salary Added' : tx.category}</span>
           </div>
         </div>
         <div class="tx-right">
@@ -706,26 +953,18 @@
     });
   }
 
+  function openIncomeModal() {
+    document.getElementById('incomeForm').reset();
+    document.getElementById('incDateInput').value = getTodayString();
+    openModal('incomeModal');
+  }
+
   function openTransactionModal(type, editId = null) {
     const form = document.getElementById('transactionForm');
     form.reset();
 
     document.getElementById('txEditingId').value = editId || '';
-    document.getElementById('txTypeInput').value = type;
-
-    const modalTitle = document.getElementById('txModalTitle');
-    const categoryGroup = document.getElementById('txCategoryGroup');
-    const dateInput = document.getElementById('txDateInput');
-
-    dateInput.value = getTodayString();
-
-    if (type === 'income') {
-      modalTitle.innerText = editId ? "Edit Added Funds 💵" : "Add Money to Bank 💵";
-      categoryGroup.style.display = 'none';
-    } else {
-      modalTitle.innerText = editId ? "Edit Spend Record 🛍️" : "Record New Spend 🛍️";
-      categoryGroup.style.display = 'block';
-    }
+    document.getElementById('txDateInput').value = getTodayString();
 
     if (editId) {
       const tx = state.transactions.find(t => t.id === editId);
@@ -733,9 +972,7 @@
         document.getElementById('txAmountInput').value = tx.amount;
         document.getElementById('txDateInput').value = tx.date;
         document.getElementById('txDescInput').value = tx.desc;
-        if (tx.type === 'expense') {
-          document.getElementById('txCategoryInput').value = tx.category;
-        }
+        document.getElementById('txCategoryInput').value = tx.category || 'Food & Drinks 🍰';
       }
     }
 
@@ -745,12 +982,19 @@
   function editTransaction(id) {
     const tx = state.transactions.find(t => t.id === id);
     if (tx) {
-      openTransactionModal(tx.type, tx.id);
+      if (tx.type === 'income') {
+        openIncomeModal();
+        document.getElementById('incAmountInput').value = tx.amount;
+        document.getElementById('incDateInput').value = tx.date;
+        document.getElementById('incDescInput').value = tx.desc;
+      } else {
+        openTransactionModal('expense', tx.id);
+      }
     }
   }
 
   function deleteTransaction(id) {
-    if (confirm("Delete this spending entry?")) {
+    if (confirm("Delete this entry?")) {
       state.transactions = state.transactions.filter(tx => tx.id !== id);
       saveState();
       renderWallet();
@@ -790,7 +1034,7 @@
           <div class="tx-icon">${icon}</div>
           <div class="tx-details">
             <span class="tx-title">${escapeHtml(tx.desc)}</span>
-            <span class="tx-date">${tx.type === 'income' ? 'Deposit' : tx.category}</span>
+            <span class="tx-date">${tx.type === 'income' ? 'Salary Added' : tx.category}</span>
           </div>
         </div>
         <div class="tx-right">
@@ -810,15 +1054,6 @@
     document.getElementById('txDateInput').value = selectedDate || getTodayString();
   }
 
-  function applyDateFilter() {
-    const dateVal = document.getElementById('calendarDatePicker').value;
-    if (dateVal) {
-      state.activeFilterDate = dateVal;
-      renderTransactions();
-      closeModal('calendarModal');
-    }
-  }
-
   function resetFilter() {
     state.activeFilterDate = null;
     renderTransactions();
@@ -836,7 +1071,12 @@
   function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
   function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.transactions, null, 2));
+    const payload = {
+      transactions: state.transactions,
+      fixedOccupations: state.fixedOccupations,
+      customOccupations: state.customOccupations
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
     const dlAnchor = document.createElement('a');
     dlAnchor.setAttribute("href", dataStr);
     dlAnchor.setAttribute("download", `Bloom_Wallet_Backup_${getTodayString()}.json`);
@@ -853,15 +1093,17 @@
     reader.onload = function(e) {
       try {
         const imported = JSON.parse(e.target.result);
-        if (Array.isArray(imported)) {
+        if (imported.transactions) {
+          state.transactions = imported.transactions;
+          if (imported.fixedOccupations) state.fixedOccupations = imported.fixedOccupations;
+          if (imported.customOccupations) state.customOccupations = imported.customOccupations;
+        } else if (Array.isArray(imported)) {
           state.transactions = imported;
-          saveState();
-          renderWallet();
-          alert("Wallet history restored successfully! ✨");
-          closeModal('settingsModal');
-        } else {
-          alert("Invalid backup file format.");
         }
+        saveState();
+        renderWallet();
+        alert("Wallet history restored successfully! ✨");
+        closeModal('settingsModal');
       } catch (err) {
         alert("Error importing JSON backup file.");
       }
@@ -874,37 +1116,96 @@
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
 
+  /* Income Form Event Listener */
+  document.getElementById('incomeForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const amount = parseFloat(document.getElementById('incAmountInput').value) || 0;
+    const date = document.getElementById('incDateInput').value;
+    const desc = document.getElementById('incDescInput').value.trim();
+
+    state.transactions.push({
+      id: Date.now(),
+      type: 'income',
+      amount: amount,
+      date: date,
+      desc: desc,
+      category: 'Salary Deposit 💵'
+    });
+
+    saveState();
+    renderWallet();
+    closeModal('incomeModal');
+  });
+
+  /* Expense Form Event Listener */
   document.getElementById('transactionForm').addEventListener('submit', (e) => {
     e.preventDefault();
 
     const editId = document.getElementById('txEditingId').value;
-    const type = document.getElementById('txTypeInput').value;
     const amount = parseFloat(document.getElementById('txAmountInput').value);
     const date = document.getElementById('txDateInput').value;
     const desc = document.getElementById('txDescInput').value.trim();
-    const category = type === 'expense' ? document.getElementById('txCategoryInput').value : 'Deposit 💵';
+    const category = document.getElementById('txCategoryInput').value;
 
     if (editId) {
       state.transactions = state.transactions.map(tx => {
         if (tx.id == editId) {
-          return { ...tx, type, amount, date, desc, category };
+          return { ...tx, amount, date, desc, category };
         }
         return tx;
       });
     } else {
       state.transactions.push({
         id: Date.now(),
-        type,
-        amount,
-        category,
-        date,
-        desc
+        type: 'expense',
+        amount: amount,
+        date: date,
+        desc: desc,
+        category: category
       });
     }
 
     saveState();
     renderWallet();
     closeModal('transactionModal');
+  });
+
+  /* Add Custom Occupation Form Event Listener */
+  document.getElementById('addOccForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('occNameInput').value.trim();
+    const amount = parseFloat(document.getElementById('occAmountInput').value) || 0;
+
+    if (name) {
+      state.customOccupations.push({
+        id: 'cust_' + Date.now(),
+        name: name,
+        amount: amount
+      });
+      saveState();
+      renderWallet();
+      closeModal('addOccModal');
+      document.getElementById('addOccForm').reset();
+    }
+  });
+
+  /* Edit Occupation Amount Form Event Listener */
+  document.getElementById('editOccForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const idKey = document.getElementById('editOccIdInput').value;
+    const amount = parseFloat(document.getElementById('editOccAmountInput').value) || 0;
+
+    if (state.fixedOccupations[idKey]) {
+      state.fixedOccupations[idKey].amount = amount;
+    } else {
+      const custom = state.customOccupations.find(c => c.id === idKey);
+      if (custom) custom.amount = amount;
+    }
+
+    saveState();
+    renderWallet();
+    closeModal('editOccModal');
   });
 
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
