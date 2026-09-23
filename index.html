@@ -129,7 +129,6 @@
 
   .icon-btn:active { transform: scale(0.92); }
 
-  /* Main Top Balance Banner Card */
   .wallet-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(237, 233, 254, 0.85) 100%);
     border: 1px solid var(--card-border);
@@ -172,7 +171,6 @@
   .stat-val.income { color: var(--income-color); }
   .stat-val.expense { color: var(--expense-color); }
 
-  /* Occupations Section & Scroll Container */
   .occupations-section {
     margin-bottom: 16px;
     flex-shrink: 0;
@@ -201,7 +199,6 @@
     border: none;
   }
 
-  /* Fixed Scrollable Occupations Grid */
   .occupations-container {
     max-height: 180px;
     overflow-y: auto;
@@ -268,7 +265,6 @@
     cursor: pointer;
   }
 
-  /* Action Buttons Grid */
   .action-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -305,7 +301,6 @@
     color: #FFFFFF;
   }
 
-  /* Scrollable History Container */
   .history-list-container {
     max-height: 380px;
     overflow-y: auto;
@@ -391,7 +386,6 @@
   .empty-state-icon { font-size: 2rem; margin-bottom: 6px; }
   .empty-state-text { font-size: 0.85rem; font-weight: 500; }
 
-  /* Modals */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -541,7 +535,6 @@
     </div>
   </header>
 
-  <!-- Main Balance Banner Card -->
   <div class="wallet-card">
     <span class="wallet-label">Available Free Cash</span>
     <div class="balance-amount" id="balanceDisplay">₹0</div>
@@ -558,7 +551,6 @@
     </div>
   </div>
 
-  <!-- Occupations Section (Fixed Container + Internal Scroll) -->
   <div class="occupations-section">
     <div class="section-label">
       <span>Allocated Occupations</span>
@@ -571,19 +563,16 @@
     </div>
   </div>
 
-  <!-- Action Buttons -->
   <div class="action-grid">
     <button class="btn-action btn-add-money" onclick="openIncomeModal()">💵 Add Salary/Income</button>
     <button class="btn-action btn-add-spend" onclick="openTransactionModal('expense')">🛍️ Record Spend</button>
   </div>
 
-  <!-- Transactions Title -->
   <div class="section-label">
     <span id="historyTitleLabel">Recent Spends & Income</span>
     <span style="font-size:0.7rem; color:var(--primary); cursor:pointer; display:none;" id="clearFilterBtn" onclick="resetFilter()">Clear Filter ✕</span>
   </div>
 
-  <!-- Scrollable History Container -->
   <div class="history-list-container">
     <div class="history-list" id="transactionList">
       <!-- Dynamic Transactions -->
@@ -592,7 +581,6 @@
 
 </div>
 
-<!-- Deposit Salary/Income Modal -->
 <div class="modal-overlay" id="incomeModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -618,7 +606,6 @@
   </div>
 </div>
 
-<!-- Record Expense Modal -->
 <div class="modal-overlay" id="transactionModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -663,7 +650,6 @@
   </div>
 </div>
 
-<!-- Add Custom Occupation Modal -->
 <div class="modal-overlay" id="addOccModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -685,7 +671,6 @@
   </div>
 </div>
 
-<!-- Edit Occupation Amount Modal -->
 <div class="modal-overlay" id="editOccModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -704,7 +689,6 @@
   </div>
 </div>
 
-<!-- Calendar Inspector Modal -->
 <div class="modal-overlay" id="calendarModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -732,7 +716,6 @@
   </div>
 </div>
 
-<!-- Settings & Backup Modal -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -752,11 +735,10 @@
 <script>
   let state = {
     transactions: [],
-    // 4 Hardcoded Fixed Occupations (Mummy, Scooter, Personal, Cake Ingredients)
+    // 3 Fixed Occupations (Personal removed)
     fixedOccupations: {
       mummy: { name: 'Mummy 🌸', amount: 0 },
       scooter: { name: 'Scooter 🛵', amount: 0 },
-      // personal: { name: 'Personal 👛', amount: 0 },
       cake: { name: 'Cake Ingredients 🎂', amount: 0 }
     },
     customOccupations: [],
@@ -772,7 +754,7 @@
   }
 
   function loadState() {
-    const saved = localStorage.getItem('bloom_wallet_girly_tracker_v7') || localStorage.getItem('bloom_wallet_girly_tracker_v6');
+    const saved = localStorage.getItem('bloom_wallet_girly_tracker_v8') || localStorage.getItem('bloom_wallet_girly_tracker_v7');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -781,7 +763,6 @@
           state.fixedOccupations = {
             mummy: parsed.fixedOccupations.mummy || { name: 'Mummy 🌸', amount: 0 },
             scooter: parsed.fixedOccupations.scooter || { name: 'Scooter 🛵', amount: 0 },
-            // personal: parsed.fixedOccupations.personal || { name: 'Personal 👛', amount: 0 },
             cake: parsed.fixedOccupations.cake || { name: 'Cake Ingredients 🎂', amount: 0 }
           };
         }
@@ -791,7 +772,7 @@
   }
 
   function saveState() {
-    localStorage.setItem('bloom_wallet_girly_tracker_v7', JSON.stringify({
+    localStorage.setItem('bloom_wallet_girly_tracker_v8', JSON.stringify({
       transactions: state.transactions,
       fixedOccupations: state.fixedOccupations,
       customOccupations: state.customOccupations
@@ -813,7 +794,7 @@
       else if (tx.type === 'expense') totalExpense += tx.amount;
     });
 
-    // Total Allocations (4 Fixed Cards + Custom)
+    // Total Allocations (3 Fixed Cards + Custom)
     let totalAllocations = (parseFloat(state.fixedOccupations.mummy.amount) || 0) +
                            (parseFloat(state.fixedOccupations.scooter.amount) || 0) +
                            (parseFloat(state.fixedOccupations.cake.amount) || 0);
@@ -837,11 +818,10 @@
     const grid = document.getElementById('occupationsGrid');
     grid.innerHTML = '';
 
-    // Render 4 Fixed Cards
+    // Render 3 Fixed Cards
     const fixedKeys = [
       { key: 'mummy', data: state.fixedOccupations.mummy },
       { key: 'scooter', data: state.fixedOccupations.scooter },
-      // { key: 'personal', data: state.fixedOccupations.personal },
       { key: 'cake', data: state.fixedOccupations.cake }
     ];
 
