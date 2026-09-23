@@ -756,7 +756,7 @@
     fixedOccupations: {
       mummy: { name: 'Mummy 🌸', amount: 0 },
       scooter: { name: 'Scooter 🛵', amount: 0 },
-      personal: { name: 'Personal 👛', amount: 0 },
+      // personal: { name: 'Personal 👛', amount: 0 },
       cake: { name: 'Cake Ingredients 🎂', amount: 0 }
     },
     customOccupations: [],
@@ -779,10 +779,10 @@
         state.transactions = parsed.transactions || [];
         if (parsed.fixedOccupations) {
           state.fixedOccupations = {
-            mummy: parsed.fixedOccupations.mummy || { name: 'Mummy 🌸', amount: 1000 },
-            scooter: parsed.fixedOccupations.scooter || { name: 'Scooter 🛵', amount: 1000 },
-            personal: parsed.fixedOccupations.personal || { name: 'Personal 👛', amount: 1000 },
-            cake: parsed.fixedOccupations.cake || { name: 'Cake Ingredients 🎂', amount: 1000 }
+            mummy: parsed.fixedOccupations.mummy || { name: 'Mummy 🌸', amount: 0 },
+            scooter: parsed.fixedOccupations.scooter || { name: 'Scooter 🛵', amount: 0 },
+            // personal: parsed.fixedOccupations.personal || { name: 'Personal 👛', amount: 0 },
+            cake: parsed.fixedOccupations.cake || { name: 'Cake Ingredients 🎂', amount: 0 }
           };
         }
         if (parsed.customOccupations) state.customOccupations = parsed.customOccupations;
@@ -816,7 +816,6 @@
     // Total Allocations (4 Fixed Cards + Custom)
     let totalAllocations = (parseFloat(state.fixedOccupations.mummy.amount) || 0) +
                            (parseFloat(state.fixedOccupations.scooter.amount) || 0) +
-                           (parseFloat(state.fixedOccupations.personal.amount) || 0) +
                            (parseFloat(state.fixedOccupations.cake.amount) || 0);
 
     state.customOccupations.forEach(occ => {
@@ -842,7 +841,7 @@
     const fixedKeys = [
       { key: 'mummy', data: state.fixedOccupations.mummy },
       { key: 'scooter', data: state.fixedOccupations.scooter },
-      { key: 'personal', data: state.fixedOccupations.personal },
+      // { key: 'personal', data: state.fixedOccupations.personal },
       { key: 'cake', data: state.fixedOccupations.cake }
     ];
 
